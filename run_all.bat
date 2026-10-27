@@ -1,0 +1,9 @@
+@echo off
+echo Zamykanie starych procesow...
+taskkill /f /im main.exe 2>nul
+
+echo Kompilacja projektu...
+g++ main.cpp glad.c -I include -I C:/OpenGl_Libs/glfw-3.4.bin.WIN64/include -L lib -L C:/OpenGl_Libs/glfw-3.4.bin.WIN64/lib-mingw-w64 -lglfw3 -lgdi32 -lopengl32 -lassimp -o main.exe
+
+echo Uruchamianie...
+start "Projekt 1" main.exe
