@@ -21,12 +21,17 @@
 class Chunk{
     public:
         Chunk(const std::vector<Block>& blocksAll, const std::unordered_set<glm::ivec3, IVec3Hash>& blockPositions){
+            Chunks.reserve(1000);
             CreatingChunksInfo(blocksAll);
             CreatingMeshVerticesForEachChunk(blockPositions);
             SettingAttributesForEachChunk();
         }
 
         void DrawAll(ShaderManager& shader, CAM& cam, const Sun& sun, const PointLight& pointLight){
+                // for (const auto& [pos, chunk] : chunkPositions) {
+                //  std::cout << "Chunk na pozycji: (" << pos.x << ", " << pos.y << ", " << pos.z << ")"<<std::endl;
+                // }
+
                 shader.uniformSetVec3("sun.direction", sun.direction);
                 shader.uniformSetVec3("sun.ambient", sun.ambient);
                 shader.uniformSetVec3("sun.diffuse", sun.diffuse);
@@ -49,8 +54,8 @@ class Chunk{
                 glm::mat4 cube(1.0);
                 cube = glm::translate(cube, glm::vec3(0.0f));
                 shader.uniformSetMat("model", cube);
-                // for(auto& [chunkPos, Chunk] : chunkPositions){
-            for(const auto& Chunk : Chunks){
+
+            for(const chunkInfo& Chunk : Chunks){
                 glBindVertexArray(Chunk.VAO);
                 glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(Chunk.meshVertices.size()));
                 glBindVertexArray(0);
@@ -63,108 +68,58 @@ class Chunk{
             glm::ivec3 chunkPosToChange = blokPosNAChunkPos(blockPos);
             // std::cout<<chunkPosToChange.x<<" "<<chunkPosToChange.y<<" "<<chunkPosToChange.z<<std::endl;
             bool blokJestNaGranicy = false;
-            // auto it = chunkPositions.find(chunkPosToChange);
-            // if(it != chunkPositions.end()){
-            //     auto& Chunk = it->second;
-            //     std::cout<<"NIgger"<<std::endl;
-            for(auto& Chunk : Chunks){
-                if(Chunk.chunkPos == chunkPosToChange){
-                    Chunk.dirty = true;
-                    if(action == BlockAction::Broken ){
-                        UpdateChunkAfterDestroingBlock(Chunk, blockPos);
-                        czyZnaleziono = true;
-                        // break;
-                    }else if(action == BlockAction::Placed){
-                        UpdateChunkAfterPuttingNewBlock(Chunk, blockPos, blocksAll);
-                        czyZnaleziono = true;
-                        // break;
-                    }
+            auto it = chunkPositions.find(chunkPosToChange);
+            if(it != chunkPositions.end()){
+                Chunks[it->second].dirty = true;
+                if(action == BlockAction::Broken ){
+                    UpdateChunkAfterDestroingBlock(Chunks[it->second], blockPos);
+                    czyZnaleziono = true; 
+                }else if(action == BlockAction::Placed){
+                    UpdateChunkAfterPuttingNewBlock(Chunks[it->second], blockPos, blocksAll);
+                    czyZnaleziono = true;    
                 }
-            }
-             if(CheckIfBlockPosIsOnChunkBorder(blockPos, chunkPosToChange)){
-                std::vector<glm::ivec3> ChunkPosesToChange = checkWhatChunkIsToChangeWhenBlockIsOnChunkBorder(blockPos, chunkPosToChange);
-                          
-               
-                //  for(auto& [chunkPos, Chunk] : chunkPositions){    
-                for(auto& Chunk : Chunks){
 
-                    for(auto& Chunkpos : ChunkPosesToChange){
-                        //  auto it = chunkPositions.find(Chunkpos);
-                        //  if(it != chunkPositions.end()){
-                            // auto Chunk = it->second;
-                            Chunk.dirty = true;
-                        }
+                UpdateChunkIfHeIsDirty(Chunks[it->second], blockPositions);
+            }
+            if(CheckIfBlockPosIsOnChunkBorder(blockPos, chunkPosToChange)){
+                std::vector<glm::ivec3> ChunkPosesToChange = checkWhatChunkIsToChangeWhenBlockIsOnChunkBorder(blockPos, chunkPosToChange);
+
+                for(const auto& Chunkpos : ChunkPosesToChange) {
+                    auto it = chunkPositions.find(Chunkpos);
+                    if(it != chunkPositions.end()) {
+                        Chunks[it->second].dirty = true; 
+                        UpdateChunkIfHeIsDirty(Chunks[it->second], blockPositions);
                     }
-                    
                 }
                 blokJestNaGranicy = true;
-            // }
+            }
 
 
 
 
             if(!czyZnaleziono){
-                std::cout<<"1: Updated GG"<<std::endl;
-                chunkInfo c;
-                c.NowoNarodzonyWTrakcieProgramu = true;
-                c.dirty = true;
-                c.chunkID = 67;
-                c.chunkPos = chunkPosToChange;
-                Chunks.push_back(c);
-                auto& newChunk = Chunks.back();
-             
+                    Chunks.emplace_back();
+                    auto& c = Chunks.back();
+                    c.NowoNarodzonyWTrakcieProgramu = true;
+                    c.dirty = true;
+                    c.chunkID = 67;
+                    c.chunkPos = chunkPosToChange;
+                    chunkPositions[chunkPosToChange] = Chunks.size() - 1;
                 if(action == BlockAction::Placed){
-                    std::cout<<"2: Updated GG"<<std::endl;
-                    UpdateChunkAfterPuttingNewBlock(newChunk, blockPos, blocksAll);
+                    UpdateChunkAfterPuttingNewBlock(c, blockPos, blocksAll);
                 }
-                
+                UpdateChunkIfHeIsDirty(c, blockPositions);
             }
             //  for(auto& [chunkPos, Chunk] : chunkPositions){
-            for(auto& Chunk : Chunks){
-                if(Chunk.dirty){
-                    CreateMeshVertices(Chunk.chunkBlocks, blockPositions, Chunk);
-                    if(Chunk.NowoNarodzonyWTrakcieProgramu){
-                        glGenVertexArrays(1, &Chunk.VAO);
-                        glGenBuffers(1, &Chunk.VBO);
-
-                        glBindVertexArray(Chunk.VAO);
-                        glBindBuffer(GL_ARRAY_BUFFER, Chunk.VBO);
-
-                        glBufferData(GL_ARRAY_BUFFER, Chunk.meshVertices.size() * sizeof(Vertex), Chunk.meshVertices.data(), GL_DYNAMIC_DRAW);
-
-                        glEnableVertexAttribArray(0);
-                        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)offsetof(Vertex, pos));
-                        glEnableVertexAttribArray(1);
-                        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)offsetof(Vertex, nor));
-                        glEnableVertexAttribArray(2);
-                        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)offsetof(Vertex, uv));
-
-                        glBindVertexArray(0);
-                        Chunk.NowoNarodzonyWTrakcieProgramu = false;
-                        Chunk.dirty = false;
-                    }else{
-                        glBindBuffer(GL_ARRAY_BUFFER, Chunk.VBO);
-                        glBufferData(GL_ARRAY_BUFFER, Chunk.meshVertices.size() * sizeof(Vertex), Chunk.meshVertices.data(), GL_DYNAMIC_DRAW);
-                        glBindBuffer(GL_ARRAY_BUFFER, 0);
-                        Chunk.dirty = false;
-                    }
-                }
-            }
-        }
-
-        unsigned int getChunkVBOForBlock(const glm::ivec3& blockPos){
-            for(auto& Chunk : Chunks){
-                glm::ivec3 chunkPoToCheck = blokPosNAChunkPos(blockPos);
-                if(Chunk.chunkPos == chunkPoToCheck){
-                    return Chunk.VBO;
-                }
-            }
-            return 1;
+            // for(chunkInfo& Chunk : Chunks){
+            //     if(Chunk.dirty){
+                   
+            //     }
+            // }
         }
 
         ~Chunk(){
-            //  for(auto& [chunkPos, Chunk] : chunkPositions){
-            for(auto& Chunk : Chunks){
+            for(chunkInfo& Chunk : Chunks){
                 glDeleteVertexArrays(1, &Chunk.VAO);
                 glDeleteBuffers(1, &Chunk.VBO);
             }
@@ -250,7 +205,7 @@ class Chunk{
             bool NowoNarodzonyWTrakcieProgramu = false;
         };
 
-        std::unordered_map<glm::ivec3, chunkInfo, IVec3Hash> chunkPositions;
+        std::unordered_map<glm::ivec3, size_t, IVec3Hash> chunkPositions;
         std::vector<chunkInfo> Chunks;
         
         void CreateMeshVertices(const std::vector<Block>& blocks, const std::unordered_set<glm::ivec3, IVec3Hash>& AllblockPositions, chunkInfo& singleChunk){
@@ -328,35 +283,31 @@ class Chunk{
         bool czyTakiChunkJuzIstnieje(const glm::ivec3& chunkPos, const Block& block){
             auto it = chunkPositions.find(chunkPos);
             if(it != chunkPositions.end()){
-                auto Chunk = it->second;
-            // for(auto& Chunk : Chunks){
-                // if(Chunk.chunkPos == chunkPos){
-                    Chunk.chunkBlocks.emplace_back(block);
-                    Chunk.chunkBlockPositions.insert(glm::ivec3(block.pos));
-
+                    Chunks[it->second].chunkBlocks.emplace_back(block);                     //DODANIE DANEGO BLOKU DO WEKTORA BLOKOW W DANYM CHUNKU
+                    Chunks[it->second].chunkBlockPositions.insert(glm::ivec3(block.pos));  //DODANIE POZYCJI DANEGO BLOKU DO UORDERED SETA POZYCJI BLOKOW W DANYM CHUNKU
                     return true;
-                    
-                // }
-            }
-
+                }
             return false;
         }
 
         void przypisanieBlokuDoPustegoChunka(const glm::ivec3& chunkPos, const Block& block){
-            chunkInfo Chunk;
-            // chunkInfo& Chunk = chunkPositions[chunkPos];
-            Chunk.chunkBlocks.push_back(block);
-            Chunk.chunkBlockPositions.insert(glm::ivec3(block.pos));
-            Chunk.chunkPos = chunkPos;
-            // chunkPositions.emplace(chunkPos, std::move(Chunk));
-            Chunks.emplace_back(std::move(Chunk));
-            // Chunks.emplace_back(chunkPositions.at(chunkPos));
+            // auto [it, inserted] = chunkPositions.try_emplace(chunkPos);
+   
+                Chunks.emplace_back();
+                auto& Chunk = Chunks.back();
 
+                // chunkInfo& Chunk = it->second;
+                Chunk.chunkBlocks.emplace_back(std::move(block));       //DODANIE BLOKU DO WEKTORA BLOKOW W DANYM CHUNKU
+                Chunk.chunkBlockPositions.insert(glm::ivec3(block.pos));//DODANIE POZYCJI DANEGO BLOKU DO UORDERED SETA POZYCJI BLOKOW W DANYM CHUNKU
+                Chunk.chunkPos = chunkPos;
+                // Chunks.emplace_back(Chunk);                  //DODANIE CHUNKA DO WEKTORA CHUNKOW
+                chunkPositions[chunkPos] = Chunks.size() - 1;
+            
+ 
         }
 
         void SettingAttributesForEachChunk(){
-            //  for(auto& [chunkPos, Chunk] : chunkPositions){   
-            for(auto& Chunk : Chunks){
+            for(chunkInfo& Chunk : Chunks){
                 glGenVertexArrays(1, &Chunk.VAO);
                 glGenBuffers(1, &Chunk.VBO);
                 // glGenBuffers(1, &VBOInstance);
@@ -393,8 +344,7 @@ class Chunk{
         }
 
         void CreatingMeshVerticesForEachChunk(const std::unordered_set<glm::ivec3, IVec3Hash>& blockPositions){
-            //  for(auto& [chunkPos, Chunk] : chunkPositions){   
-            for(auto& Chunk : Chunks){
+            for(chunkInfo& Chunk: Chunks){
                 CreateMeshVertices(Chunk.chunkBlocks, blockPositions, Chunk);
             }
         }
@@ -410,12 +360,42 @@ class Chunk{
             }
         }
 
+        void UpdateChunkIfHeIsDirty(chunkInfo& Chunk, const std::unordered_set<glm::ivec3, IVec3Hash>& blockPositions){
+         CreateMeshVertices(Chunk.chunkBlocks, blockPositions, Chunk);
+            if(Chunk.NowoNarodzonyWTrakcieProgramu){
+                glGenVertexArrays(1, &Chunk.VAO);
+                glGenBuffers(1, &Chunk.VBO);
+
+                glBindVertexArray(Chunk.VAO);
+                glBindBuffer(GL_ARRAY_BUFFER, Chunk.VBO);
+
+                glBufferData(GL_ARRAY_BUFFER, Chunk.meshVertices.size() * sizeof(Vertex), Chunk.meshVertices.data(), GL_DYNAMIC_DRAW);
+
+                glEnableVertexAttribArray(0);
+                glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)offsetof(Vertex, pos));
+                glEnableVertexAttribArray(1);
+                glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)offsetof(Vertex, nor));
+                glEnableVertexAttribArray(2);
+                glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)offsetof(Vertex, uv));
+
+                glBindVertexArray(0);
+                Chunk.NowoNarodzonyWTrakcieProgramu = false;
+                Chunk.dirty = false;
+
+            }else{
+                glBindBuffer(GL_ARRAY_BUFFER, Chunk.VBO);
+                glBufferData(GL_ARRAY_BUFFER, Chunk.meshVertices.size() * sizeof(Vertex), Chunk.meshVertices.data(), GL_DYNAMIC_DRAW);
+                glBindBuffer(GL_ARRAY_BUFFER, 0);
+                Chunk.dirty = false;
+
+            }
+        }
+
         void UpdateChunkAfterPuttingNewBlock(chunkInfo& Chunk, const glm::ivec3& blockPos, const std::vector<Block>& blocksAll){
-            
             unsigned int BlocksVecSize = blocksAll.size();
             unsigned int lastBlockID = blocksAll[BlocksVecSize - 1].id;
-            Chunk.chunkBlocks.emplace_back(blockPos, lastBlockID, 0);
-            Chunk.chunkBlockPositions.insert(glm::ivec3(blockPos));
+            Chunk.chunkBlocks.emplace_back(blockPos, lastBlockID, 0); //DODANIE BLOKU DO WEKTORA BLOKOW W DANYM CHUNKU
+            Chunk.chunkBlockPositions.insert(glm::ivec3(blockPos));   //DODANIE POZYCJI DANEGO BLOKU DO UNORDERED SETA POZYCJI BLOKOW W DANYM CHUNKU
         }
 
         bool CheckIfBlockPosIsOnChunkBorder(const glm::ivec3& blockPos, glm::ivec3& chunkPos){

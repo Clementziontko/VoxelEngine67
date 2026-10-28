@@ -20,7 +20,7 @@ class WorldManager{
     public:
         WorldManager(unsigned int BlocksNumber_Temp) : BlocksNumber(BlocksNumber_Temp){
             creatingBlocksParameters();
-            // creatingBlockPositionsParameters();
+            creatingBlockPositionsParameters();
         }
 
         const std::vector<Block>& getBlocks()const {

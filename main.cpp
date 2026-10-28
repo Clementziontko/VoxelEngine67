@@ -136,9 +136,8 @@ int main(){
     stbi_set_flip_vertically_on_load(true);
     constexpr float inf = std::numeric_limits<float>::infinity();
 
-    WorldManager World(4000);
+    WorldManager World(5000);
     Chunk chunk(World.getBlocks(), World.getBlocksPositions());
-    // CubeManager Cube(World.getBlocks(), World.getBlocksPositions());
     RayCastCollision RayCast;
     BoundingBox CollisionBox;
     InputManager inputManager;
