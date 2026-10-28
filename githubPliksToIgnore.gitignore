@@ -1,0 +1,53 @@
+# =========================
+# PLIKI BINARNE I WYNIKOWE
+# =========================
+*.exe
+*.out
+*.app
+*.o
+*.obj
+*.lib
+*.a
+*.dll
+*.so
+*.dylib
+
+# =========================
+# FOLDERY BUDOWANIA (BUILD)
+# =========================
+build/
+bin/
+out/
+target/
+debug/
+release/
+
+# Jeśli zdarzy się używać CMake:
+CMakeFiles/
+CMakeCache.txt
+cmake-install.cmake
+Makefile
+
+# =========================
+# DEBUGOWANIE I LOGI
+# =========================
+*.log
+*.pdb
+*.idb
+*.ilk
+*.dmp
+
+# =========================
+# EDYTORY I ŚRODOWISKA (np. VS Code)
+# =========================
+.vscode/
+.idea/
+*.suo
+*.user
+.vs/
+
+# =========================
+# SYSTEM OPERACYJNY
+# =========================
+.DS_Store
+Thumbs.db
