@@ -30,7 +30,7 @@ enum class BlockType
 
 enum class BlockAction {
     Broken,  // Blok został rozwalony
-    Placed   // Nowy blok został postawiony
+    Placed  // Nowy blok został postawiony
 };
 
 struct Block{

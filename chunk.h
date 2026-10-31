@@ -17,11 +17,12 @@
 #include <tuple>
 #include <utility>
 
+constexpr unsigned int chunkReserved = 1000;
 
 class Chunk{
     public:
         Chunk(const std::vector<Block>& blocksAll, const std::unordered_set<glm::ivec3, IVec3Hash>& blockPositions){
-            Chunks.reserve(1000);
+            Chunks.reserve(chunkReserved);
             CreatingChunksInfo(blocksAll);
             CreatingMeshVerticesForEachChunk(blockPositions);
             SettingAttributesForEachChunk();
@@ -293,14 +294,14 @@ class Chunk{
         void przypisanieBlokuDoPustegoChunka(const glm::ivec3& chunkPos, const Block& block){
             // auto [it, inserted] = chunkPositions.try_emplace(chunkPos);
    
-                Chunks.emplace_back();
-                auto& Chunk = Chunks.back();
+                // Chunks.emplace_back();
+                chunkInfo Chunk;
 
                 // chunkInfo& Chunk = it->second;
                 Chunk.chunkBlocks.emplace_back(std::move(block));       //DODANIE BLOKU DO WEKTORA BLOKOW W DANYM CHUNKU
                 Chunk.chunkBlockPositions.insert(glm::ivec3(block.pos));//DODANIE POZYCJI DANEGO BLOKU DO UORDERED SETA POZYCJI BLOKOW W DANYM CHUNKU
                 Chunk.chunkPos = chunkPos;
-                // Chunks.emplace_back(Chunk);                  //DODANIE CHUNKA DO WEKTORA CHUNKOW
+                Chunks.emplace_back(std::move(Chunk));                  //DODANIE CHUNKA DO WEKTORA CHUNKOW
                 chunkPositions[chunkPos] = Chunks.size() - 1;
             
  

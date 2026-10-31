@@ -28,6 +28,7 @@
 #include "WorldManager.h"
 #include "inputManager.h"
 #include "chunk.h"
+#include "frustum.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -138,6 +139,7 @@ int main(){
 
     WorldManager World(5000);
     Chunk chunk(World.getBlocks(), World.getBlocksPositions());
+    Frustum frustum;
     RayCastCollision RayCast;
     BoundingBox CollisionBox;
     InputManager inputManager;
