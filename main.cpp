@@ -245,16 +245,12 @@ int main(){
 
             if(CzyRobicRayCast){ world.RayCast(RayCast, cam, Chunk, tChunks, tBlocks); }
       
-
-
         }
         if(world.getRayCastResults().block != nullptr && world.getRayCastResults().chunk != nullptr){
             CollisionBox.Draw(collisionBoxShader, world.getRayCastResults().block->pos);
             if(inputManager.LPMClicked(display.window)){
                 glm::ivec3 chunkPosToChange = world.getRayCastResults().chunk->getChunkpos();
                 glm::ivec3 blockPosToChange = world.getRayCastResults().block->pos;
-                // std::cout << "Chunk Pos: [" << chunkPosToChange.x << ", " << chunkPosToChange.y << ", " << chunkPosToChange.z << "] | "
-                // << "Block Pos: [" << blockPosToChange.x << ", " << blockPosToChange.y << ", " << blockPosToChange.z << "]\n";
                 world.destroyBlock(chunkPosToChange, blockPosToChange, BlockAction::Broken);
                 czyZmianaSwiata = true;
 
@@ -264,84 +260,13 @@ int main(){
             else if(inputManager.PPMClicked(display.window)){
                 glm::ivec3 potentialChunkPos = world.getRayCastResults().chunk->getChunkpos();
                 glm::ivec3 blockPosToPutOnBlock = world.getRayCastResults().block->pos + world.getRayCastResults().ktoraŚciana;   
-
                 world.putaBlock(potentialChunkPos, blockPosToPutOnBlock, BlockAction::Placed);
-
-
                 czyZmianaSwiata = true;
 
                 world.getRayCastResults().block = nullptr;
                 world.getRayCastResults().chunk = nullptr;
             }
         }
-
-        // std::cout << "Vertices: " << totalVertices << '\n';
-        // std::cout<<"Chunki wszystkie: "<<chunkiWszystkie<<'\n'<<
-        // "chunki zarenderowane: "<<chunkiRenderowane<<'\n'<<
-        // "Chunki odrzucone: "<<chunkiWszystkie - chunkiRenderowane<<std::endl;
-
-
-
-        // float t = +inf;
-        // int blockID = -1;
-        // glm::ivec3 hitPos = glm::ivec3(0.0f);
-        // glm::ivec3 ktoraŚciana = glm::ivec3(0.0f);
-        // const Block* TempBlock = nullptr;
-        // glm::mat4 cubePos = (1.0);
-
-        // for(auto& chunk : world.GetChunksVec()){
-        //     for(auto& block : chunk.GetChunkBlocks()){
-        //         RayAABBResultBlock Results = RayCast.rayAABB(cam.getViewPos(), cam.getCamFront(), block.pos);
-
-        //         if(Results.hit){
-        //             if(Results.distance < t){
-        //                 t = Results.distance;
-        //                 blockID = block.id;
-        //                 hitPos = Results.hitPos;
-        //                 ktoraŚciana = Results.ktoraŚciana;
-        //                 TempBlock = &block;
-        //                 //std::cout<<"1: "<<block.pos.x<<" "<<block.pos.y<<" "<<block.pos.z<<std::endl;
-        //                 // std::cout<<hitPos.x <<"  "<< hitPos.y<<"  "<<hitPos.z<<"  "<<std::endl;
-                        
-        //             }
-
-        //         // std::cout<<ktoraŚciana.x<<"   "<<ktoraŚciana.y<<"   "<<ktoraŚciana.z<<std::endl;
-        //         }
-                
-            
-                
-        //     }
-        // }
-
-       
-        // if(TempBlock != nullptr){
-        //     //CollisionBox.DrawStencilTest(testCubeShader, collisionBoxShader, TempBlock->pos, chunk.getChunkVBOForBlock(TempBlock->pos));
-        //     //CollisionBox.DrawGeometryShader(collisionBoxShaderGS, TempBlock->pos);
-        //     CollisionBox.Draw(collisionBoxShader, TempBlock->pos);
-        //     // if(inputManager.LPMClicked(display.window)){
-        //     //     glm::ivec3 breakPos = TempBlock->pos;
-        //     //     unsigned int blockId = TempBlock->id;
-        //     //     World.destroyBlock(blockId, breakPos);
-        //     //     chunk.UpdateChunk(breakPos, BlockAction::Broken, World.getBlocks(), World.getBlocksPositions());
-        //     //     // std::cout<<"2: "<<" "<<TempBlock->pos.x<<" "<<TempBlock->pos.y<<" "<<TempBlock->pos.z<<std::endl;
-        //     //     TempBlock = nullptr;
-        //     //     // Cube.UpdateInstances(World.getBlocks());
-        //     //     //Cube.CreateMeshVertices(World.getBlocks(), World.getBlocksPositions());
-        //     //     //Cube.UpdateAttributes();
-        //     // }
-        //     // else if(inputManager.PPMClicked(display.window)){
-        //     //     glm::ivec3 PutPos = TempBlock->pos + ktoraŚciana;
-        //     //     World.PutBlock(PutPos);
-        //     //     chunk.UpdateChunk(PutPos, BlockAction::Placed, World.getBlocks(), World.getBlocksPositions());
-        //     //     // std::cout<<"2: "<<" "<<TempBlock->pos.x<<" "<<TempBlock->pos.y<<" "<<TempBlock->pos.z<<std::endl;
-        //     //     // std::cout<<"3: "<<" "<<(TempBlock->pos + ktoraŚciana).x<<" "<<(TempBlock->pos + ktoraŚciana).y<<" "<<(TempBlock->pos + ktoraŚciana).z<<std::endl;
-        //     //     TempBlock = nullptr;
-        //     //     // Cube.UpdateInstances(World.getBlocks());
-        //     //     //Cube.CreateMeshVertices(World.getBlocks(), World.getBlocksPositions());
-        //     //     //Cube.UpdateAttributes();
-        //     // }
-        // }
-       
 
         glfwSwapBuffers(display.window);
         glfwPollEvents();
