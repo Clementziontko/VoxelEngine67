@@ -4,6 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+
+
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -13,21 +15,19 @@
 #include <sstream>
 #include <string>
 #include <chrono>
- 
-#include "cam.h"
-#include "display.h"
+
+#include "Camera.h"
+#include "Display.h"
 #include "mesh.h"
-#include "model.h"
-#include "shaderManager.h"
+#include "Model.h"
+#include "ShaderManager.h"
 #include "meshEasy.h"
-#include "texture.h"
-#include "boundingBoxSzescian.h"
-#include "block.h"
+#include "BoundingBox.h"
+#include "TextureSingle.h"
+#include "BlockBoundingBox.h"
 #include "UBO.h"
-#include "CubeManager.h"
-// #include "RayCastAABB.h"
-// #include "WorldManager.h"
-#include "inputManager.h"
+// #include "CubeManager.h"
+#include "InputManager.h"
 #include "chunk.h"
 #include "frustum.h"
 #include "World.h"
@@ -58,10 +58,26 @@ int main(){
     Display display(SCR_WIDTH, SCR_HEIGHT);
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 
-    ShaderManager lightShader("lightShader.vert", "lightShader.frag");
-    ShaderManager testCubeShader("cubeShader.vert", "cubeShader.frag");
-    ShaderManager collisionBoxShader("collisionBoxShader.vert", "collisionBoxShader.frag");
-    ShaderManager collisionBoxShaderGS("gsBoundingBoxshader.vert", "gsBoundingBoxshader.frag", "gsBoundingBoxshader.geom");
+ShaderManager lightShader(
+    "assets/shaders/lightShader.vert",
+    "assets/shaders/lightShader.frag"
+);
+
+ShaderManager testCubeShader(
+    "assets/shaders/cubeShader.vert",
+    "assets/shaders/cubeShader.frag"
+);
+
+ShaderManager collisionBoxShader(
+    "assets/shaders/collisionBoxShader.vert",
+    "assets/shaders/collisionBoxShader.frag"
+);
+
+ShaderManager collisionBoxShaderGS(
+    "assets/shaders/gsBoundingBoxshader.vert",
+    "assets/shaders/gsBoundingBoxshader.frag",
+    "assets/shaders/gsBoundingBoxshader.geom"
+);
 
     CAM cam(display.window);
     globalnaKamera = &cam;
@@ -149,10 +165,10 @@ int main(){
 
     Frustum frustum;
     RayCastCollision RayCast;
-    BoundingBox CollisionBox;
+    BlockBoundingBox CollisionBox;
     InputManager inputManager;
-    TextureSingle tx0("container2.png", 0);
-    TextureSingle tx1("container2_specular.png", 1, false); 
+    TextureSingle tx0("assets/textures/container2.png", 0);
+    TextureSingle tx1("assets/textures/container2_specular.png", 1, false); 
     tx0.load();
     tx1.load();
 
@@ -259,7 +275,7 @@ int main(){
             }
             else if(inputManager.PPMClicked(display.window)){
                 glm::ivec3 potentialChunkPos = world.getRayCastResults().chunk->getChunkpos();
-                glm::ivec3 blockPosToPutOnBlock = world.getRayCastResults().block->pos + world.getRayCastResults().ktoraŚciana;   
+                glm::ivec3 blockPosToPutOnBlock = world.getRayCastResults().block->pos + world.getRayCastResults().hitFace;   
                 world.putaBlock(potentialChunkPos, blockPosToPutOnBlock, BlockAction::Placed);
                 czyZmianaSwiata = true;
 

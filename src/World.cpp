@@ -1,4 +1,6 @@
 #include "World.h"
+#include "ShaderManager.h"
+#include "chunk.h"
 #include <cmath>
 #include<unordered_map>
 
@@ -187,7 +189,7 @@ void World::RayCast(RayCastCollision& rayCast, CAM& cam, ChunkG& Chunk, float& t
                             rayCastHit.blockPosition = Block.pos;
                             rayCastHit.distance = blockResults.distance;
                             rayCastHit.hitPoint = blockResults.hitPos;
-                            rayCastHit.ktoraŚciana = blockResults.ktoraŚciana;
+                            rayCastHit.hitFace = blockResults.ktoraŚciana;
                             tBlocks = blockResults.distance;
                         }
                     }
