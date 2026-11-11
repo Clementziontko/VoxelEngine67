@@ -1,4 +1,6 @@
+#pragma once
 #include <glad/glad.h>
+
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
@@ -14,6 +16,7 @@
 
 class CAM{
     public: 
+        
         CAM(GLFWwindow* window_c) : window(window_c){
             
         }
@@ -29,12 +32,41 @@ class CAM{
         glm::vec3 getCamFront(){
             return cameraFront;
         }
+        float currentFps = 0.0f;
+
+        bool cameraMoved(){if(previousFrameCamPos != cameraPos){ return true; } return false; }
+        bool cameraRotated(){if(previousFrameCamFront != cameraFront){ return true; } return false; }
+
+        void updatingPreviousFramesCamVariables(){
+            previousFrameCamPos = cameraPos;
+            previousFrameCamFront = cameraFront;
+        }
+
 
         void updtating_cam_vec(){
             float currentFrame = static_cast<float>(glfwGetTime());
             dt = currentFrame - lastFrame;
             lastFrame = currentFrame;
+
+
+            getSmoothedFPS();
             view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        }
+
+
+
+        float getSmoothedFPS() {
+            frameCount++;
+            timeAccumulator += dt;
+
+            // Odświeżaj wartość FPS co 0.2 sekundy (200 ms)
+            if (timeAccumulator >= 0.2f) {
+                currentFps = static_cast<float>(frameCount) / timeAccumulator;
+                frameCount = 0;
+                timeAccumulator = 0.0f;
+            }
+
+            return currentFps;
         }
 
         void getKeyboard(){
@@ -97,6 +129,10 @@ class CAM{
         glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f,  0.0f);
         glm::mat4 view;
 
+
+        glm::vec3 previousFrameCamPos = glm::vec3(0.0f, 0.0f,  3.0f);
+        glm::vec3 previousFrameCamFront = glm::vec3(0.0f, 0.0f, -1.0f);
+
         float cameraSpeed;
         float camSpeed = 10.5f;
         float dt = 0.0f;	
@@ -107,6 +143,9 @@ class CAM{
         float lastX =  800.0f / 2.0;
         float lastY =  600.0 / 2.0;
         float fov   =  45.0f;
+        
+        float timeAccumulator = 0.0f;
+        int frameCount = 0;
         
 };
 

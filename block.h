@@ -19,6 +19,7 @@
 #include "shaderManager.h"
 #include "meshEasy.h"
 
+class ChunkG;
 
 enum class BlockType
 {
@@ -34,13 +35,32 @@ enum class BlockAction {
 };
 
 struct Block{
+        Block() = default;
         glm::ivec3 pos;
         unsigned int id;
-        unsigned type;
+        BlockType type;
         unsigned int texId;
-        Block();
-        Block(glm::vec3 position, unsigned int blockID, unsigned int blockType) : pos(position), id(blockID), type(blockType){}
+        // Block();
+        Block(glm::ivec3 position, unsigned int blockID, BlockType blockType) : pos(position), id(blockID), type(blockType){}
 };
+
+struct RaycastHit
+{
+    ChunkG* chunk = nullptr;
+
+    Block* block = nullptr;
+
+    glm::ivec3 blockPosition;
+
+    glm::ivec3 ktoraŚciana;
+
+    glm::vec3 hitPoint;
+
+    float distance;
+
+    bool hit = false;
+};
+
 
 
 struct PointLight{

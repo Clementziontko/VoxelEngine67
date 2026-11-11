@@ -4,7 +4,7 @@ taskkill /f /im main.exe 2>nul
 taskkill /f /im frustum.exe 2>nul
 
 echo Kompilacja projektu...
-g++ main.cpp frustum.cpp glad.c -I include -I C:/OpenGl_Libs/glfw-3.4.bin.WIN64/include -L lib -L C:/OpenGl_Libs/glfw-3.4.bin.WIN64/lib-mingw-w64 -lglfw3 -lgdi32 -lopengl32 -lassimp -o main.exe
+g++ main.cpp frustum.cpp World.cpp chunk.cpp rayCastCollisionAABB.cpp glad.c -I include -I C:/OpenGl_Libs/glfw-3.4.bin.WIN64/include -L lib -L C:/OpenGl_Libs/glfw-3.4.bin.WIN64/lib-mingw-w64 -lglfw3 -lgdi32 -lopengl32 -lassimp -o main.exe
 
 echo Uruchamianie...
 start "Projekt 1" main.exe

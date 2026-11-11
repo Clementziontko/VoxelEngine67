@@ -15,11 +15,22 @@ struct RayAABBResultBlock {
     float distance;
 };
 
+struct RayAABBResultChunk{
+    bool hit;
+    float distance;
+
+};
+
 class RayCastCollision{
     public:
 
-        RayAABBResultBlock rayAABB(const glm::vec3& camPos, const glm::vec3& camFront, const glm::vec3& pos){
-            maxIminVec(pos);
+
+        RayAABBResultChunk rayAABBChunk(const glm::vec3& camPos, const glm::vec3& camFront, const glm::vec3& pos);
+
+        RayAABBResultBlock rayAABBBlock(const glm::vec3& camPos, const glm::vec3& camFront, const glm::vec3& pos){
+            glm::vec3 MinVec;
+            glm::vec3 MaxVec;
+            maxIminVecBlock(pos, MinVec, MaxVec);
             std::vector<glm::vec2> wyniki;
             float newMax;
             float newMin;
@@ -98,9 +109,7 @@ class RayCastCollision{
 
 
     private:
-        glm::vec3 MinVec;
-        glm::vec3 MaxVec;
-        void maxIminVec(const glm::vec3& pos){
+        void maxIminVecBlock(const glm::vec3& pos, glm::vec3 MinVec, glm::vec3 MaxVec){
             MinVec = pos;
             MaxVec = pos + glm::vec3(1.0f);
         }  

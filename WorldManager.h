@@ -7,7 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // #include "cam.h"
-#include "block.h"
+// #include "block.h"
 
 
 #include <iostream>

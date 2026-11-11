@@ -4,9 +4,6 @@
 #include <glm/gtc/matrix_access.hpp>
 
 
-
-
-
 void Frustum::UpdatePV(const glm::mat4& projection, const glm::mat4& view){
     pvMatrix = projection * view;
 }
@@ -55,3 +52,4 @@ bool Frustum::CheckIfChunkIsToCull(const glm::ivec3& chunkPosition){
     }
     return false;
 }
+
