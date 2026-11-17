@@ -167,11 +167,6 @@ void World::putaBlock(const glm::ivec3& potentialChunkPos, const glm::ivec3& blo
         }
 
 
-        
-
-
-
-
 }
 
 

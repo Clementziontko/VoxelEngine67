@@ -42,6 +42,10 @@ void ShaderManager::uniformSetVec3(const char* location, const glm::vec3& vec3_t
     glUniform3fv(glGetUniformLocation(shaderProgram, location), 1, glm::value_ptr(vec3_to_set));
 }
 
+void ShaderManager::uniformSetVec4(const char* location, const glm::vec4& vec4_to_set){
+    glUniform4fv(glGetUniformLocation(shaderProgram, location), 1, glm::value_ptr(vec4_to_set));
+}
+
 // Compile vertex, fragment, and optional geometry shaders, then link them
 void ShaderManager::kompilacjaShaderow(const char* vertexPath, const char* fragmentPath, const char* geometryPath) {
     std::string vertexCode = wczytaj_plik_szadera(vertexPath);

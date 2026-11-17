@@ -30,6 +30,7 @@ bool CAM::cameraRotated() {
 
 // Update previous frame position and orientation trackers
 void CAM::updatingPreviousFramesCamVariables() {
+    // std::cout<<cameraPos.x<<" "<<cameraPos.z<<std::endl;
     previousFrameCamPos = cameraPos;
     previousFrameCamFront = cameraFront;
 }

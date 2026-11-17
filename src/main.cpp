@@ -32,6 +32,7 @@
 #include "frustum.h"
 #include "World.h"
 #include "rayCastCollisionAABB.h"
+#include "cubeMapSkyTexture.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -51,33 +52,45 @@ void mouse_callback_wrapper(GLFWwindow* window, double xpos, double ypos){
     }
 }
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+
+constexpr unsigned int SCR_WIDTH = 800;
+constexpr unsigned int SCR_HEIGHT = 600;
+
 
 int main(){
     Display display(SCR_WIDTH, SCR_HEIGHT);
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 
-ShaderManager lightShader(
-    "assets/shaders/lightShader.vert",
-    "assets/shaders/lightShader.frag"
-);
-
-ShaderManager testCubeShader(
+    
+/////Shaders Creating ------------------------------------------------------------------------------
+ShaderManager CubeShader(
     "assets/shaders/cubeShader.vert",
     "assets/shaders/cubeShader.frag"
 );
 
-ShaderManager collisionBoxShader(
-    "assets/shaders/collisionBoxShader.vert",
-    "assets/shaders/collisionBoxShader.frag"
+ShaderManager boxHighlighterShader(
+    "assets/shaders/boxHighlighterShader.vert",
+    "assets/shaders/boxHighlighterShader.frag"
 );
+ShaderManager faceHighlighterShader(
+    "assets/shaders/faceHighlighterShader.vert",
+    "assets/shaders/faceHighlighterShader.frag", 
+    "assets/shaders/faceHighlighterShader.geom"
+);
+
 
 ShaderManager collisionBoxShaderGS(
     "assets/shaders/gsBoundingBoxshader.vert",
     "assets/shaders/gsBoundingBoxshader.frag",
     "assets/shaders/gsBoundingBoxshader.geom"
 );
+
+ShaderManager cubeMapShader(
+    "assets/shaders/cubeMapShader.vert",
+    "assets/shaders/cubeMapShader.frag"
+);
+//-------------------------------------------------------------------------------------------------------
+
 
     CAM cam(display.window);
     globalnaKamera = &cam;
@@ -151,48 +164,117 @@ ShaderManager collisionBoxShaderGS(
         0.0f, 1.0f, 1.0f,    0.0f,  1.0f,  0.0f,   0.0f, 0.0f
     }; 
     
+    std::vector<float> skyboxVertices = {
+        // positions          
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f, -1.0f,
+         1.0f,  1.0f,  1.0f,
+         1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f, -1.0f,
+         1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+         1.0f, -1.0f,  1.0f
+    };
     
-    MeshEasy light(vertices);
+
+    MeshEasy skyBox(skyboxVertices, false, false, true);
     stbi_set_flip_vertically_on_load(true);
     constexpr float inf = std::numeric_limits<float>::infinity();
     unsigned int nigger = 0;
+    bool czyZmianaSwiata = false;
 
+
+////World Generation --------------------------------------------------------------------------------------
     World world(200);
-    for(auto& chunk : world.GetChunksVec()){
+    for(auto& chunk : world.GetChunksVec())
+    {
         chunk.CreateMeshVertices(world.GetChunksVec(), world.GetChunksVecPos());
         chunk.SettingAttributesForChunk();
     }
+//------------------------------------------------------------------------------------------------------------
 
+
+////Needed objects Creating ---------------------------------------------------------------------------------
     Frustum frustum;
     RayCastCollision RayCast;
     BlockBoundingBox CollisionBox;
-    InputManager inputManager;
-    TextureSingle tx0("assets/textures/container2.png", 0);
-    TextureSingle tx1("assets/textures/container2_specular.png", 1, false); 
+    InputManager Input;
+//------------------------------------------------------------------------------------------------------------
+
+
+////Creating textures ---------------------------------------------------------------------------------------
+    TextureSingle tx0("assets/textures/DMdirt.png", 0, false);
+    TextureSingle tx1("assets/textures/SMdirt.png", 1, false); 
+    CubeMapTexture cubeMapSkytx2("assets/textures/Cubemap_Sky_21-512x512.png", 2, false); //21
     tx0.load();
     tx1.load();
+    cubeMapSkytx2.load();
 
-    testCubeShader.shaderRun();
-    testCubeShader.uniformSetInt("texture_diffuse1", 0); 
-    testCubeShader.uniformSetInt("texture_specular1", 1);
+    CubeShader.shaderRun();
+    CubeShader.uniformSetInt("texture_diffuse1", 0); 
+    CubeShader.uniformSetInt("texture_specular1", 1);
+    cubeMapShader.shaderRun();
+    cubeMapShader.uniformSetInt("skybox", 2);
+//------------------------------------------------------------------------------------------------------------
+
     glm::mat4 projection  = glm::mat4(1.0f);
     projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
-    //+++++++++++++++++ UBO ++++++++++++++++++++++
+////UBO- Projection, CamView ------------------------------------------------------------------------------------------------------------
     UBOBuffer UBOMatrices(128, 0);
 
-    unsigned int blockIndex1 = glGetUniformBlockIndex(testCubeShader.shaderProgram, "Matrices");
-    unsigned int blockIndex2 = glGetUniformBlockIndex(lightShader.shaderProgram, "Matrices");
-    unsigned int blockIndex3 = glGetUniformBlockIndex(collisionBoxShader.shaderProgram, "Matrices");
+    unsigned int blockIndex1 = glGetUniformBlockIndex(CubeShader.shaderProgram, "Matrices");
+    unsigned int blockIndex3 = glGetUniformBlockIndex(boxHighlighterShader.shaderProgram, "Matrices");
     unsigned int blockIndex4 = glGetUniformBlockIndex(collisionBoxShaderGS.shaderProgram, "Matrices");
+    unsigned int blockIndex5 = glGetUniformBlockIndex(cubeMapShader.shaderProgram, "Matrices");
+    unsigned int blockIndex6 = glGetUniformBlockIndex(faceHighlighterShader.shaderProgram, "Matrices");
 
-    glUniformBlockBinding(testCubeShader.shaderProgram, blockIndex1, 0);
-    glUniformBlockBinding(lightShader.shaderProgram, blockIndex2, 0);
-    glUniformBlockBinding(collisionBoxShader.shaderProgram, blockIndex3, 0);
+    glUniformBlockBinding(CubeShader.shaderProgram, blockIndex1, 0);
+    glUniformBlockBinding(boxHighlighterShader.shaderProgram, blockIndex3, 0);
     glUniformBlockBinding(collisionBoxShaderGS.shaderProgram, blockIndex4, 0);
+    glUniformBlockBinding(cubeMapShader.shaderProgram, blockIndex5, 0);
+    glUniformBlockBinding(faceHighlighterShader.shaderProgram, blockIndex6, 0);
 
-
-    world.setUniformsForShaders(testCubeShader);
+    CubeShader.shaderRun();
+    world.setUniformsForShaders(CubeShader);
+    glBindBuffer(GL_UNIFORM_BUFFER, UBOMatrices.getUBO());
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+//-----------------------------------------------------------------------------------------------------------------------------------------
+    
 
     while (!glfwWindowShouldClose(display.window) && display.running){
         processInput(display.window);
@@ -208,29 +290,20 @@ ShaderManager collisionBoxShaderGS(
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         glBindBuffer(GL_UNIFORM_BUFFER, UBOMatrices.getUBO());
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(projection));
+       
         glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(cam.getView()));
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         glStencilMask(0x00);
-            
-//////////Point Light Shader Setting---------------------------------------------------------------------------------------------------------------
-        lightShader.shaderRun();
-        glm::mat4 model(1.0);
-        model = glm::translate(model, glm::vec3(0.0f, 3.0f, 0.0f));
-        model = glm::scale(model, glm::vec3(0.8f));
-        lightShader.uniformSetMat("model", model);
-        lightShader.uniformSetVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-        light.Draw();
-        
 
-//////////Cube Model Settings, Drawing World, RayCast, Drawing Bounding Box--------------------------------------------------------------------------
 
-        testCubeShader.shaderRun();    
+//////////Cube Model =  Settings, Drawing World, RayCast, Drawing Bounding Box--------------------------------------------------------------------------
+
+        CubeShader.shaderRun();    
         tx0.textureBind();
         tx1.textureBind();
         bool CzyRobicRayCast = false;
-        bool czyZmianaSwiata = false;
+       
         if(cam.cameraMoved() || cam.cameraRotated() || czyZmianaSwiata){ CzyRobicRayCast = true; }
         czyZmianaSwiata = false;
         frustum.UpdatePV(projection, cam.getView());
@@ -257,14 +330,32 @@ ShaderManager collisionBoxShaderGS(
             chunkiRenderowane++;
             totalVertices += Chunk.GetChunkMeshVertices().size();
 
-            world.DrawChunk(testCubeShader, cam, Chunk);
+            world.DrawChunk(CubeShader, cam, Chunk);
 
             if(CzyRobicRayCast){ world.RayCast(RayCast, cam, Chunk, tChunks, tBlocks); }
       
         }
+
+//////////Sky Box Shader Setting---------------------------------------------------------------------------------------------------------------
+        cubeMapShader.shaderRun();
+        cubeMapSkytx2.textureBind();
+        glDepthFunc(GL_LEQUAL); 
+        // glDepthMask(GL_FALSE);
+
+        skyBox.Draw();
+
+        // glBindVertexArray(skyboxVAO);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
+
+
+
         if(world.getRayCastResults().block != nullptr && world.getRayCastResults().chunk != nullptr){
-            CollisionBox.Draw(collisionBoxShader, world.getRayCastResults().block->pos);
-            if(inputManager.LPMClicked(display.window)){
+            CollisionBox.Draw(boxHighlighterShader, faceHighlighterShader, world.getRayCastResults().block->pos, world.getRayCastResults().hitFace);
+            // std::cout<<world.getRayCastResults().hitFace.x<<" "<<world.getRayCastResults().hitFace.y<<" "<<world.getRayCastResults().hitFace.z<<std::endl;
+            if(Input.LPMClicked(display.window)){
                 glm::ivec3 chunkPosToChange = world.getRayCastResults().chunk->getChunkpos();
                 glm::ivec3 blockPosToChange = world.getRayCastResults().block->pos;
                 world.destroyBlock(chunkPosToChange, blockPosToChange, BlockAction::Broken);
@@ -273,7 +364,7 @@ ShaderManager collisionBoxShaderGS(
                 world.getRayCastResults().block = nullptr;
                 world.getRayCastResults().chunk = nullptr;
             }
-            else if(inputManager.PPMClicked(display.window)){
+            else if(Input.PPMClicked(display.window)){
                 glm::ivec3 potentialChunkPos = world.getRayCastResults().chunk->getChunkpos();
                 glm::ivec3 blockPosToPutOnBlock = world.getRayCastResults().block->pos + world.getRayCastResults().hitFace;   
                 world.putaBlock(potentialChunkPos, blockPosToPutOnBlock, BlockAction::Placed);

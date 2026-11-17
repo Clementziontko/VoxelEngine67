@@ -16,7 +16,8 @@ public:
         setUp();
     }
 
-    MeshEasy(const std::vector<float>& vertices_c, bool czy_indices_c = false, bool AttributesPlus_c = false) : vertices(vertices_c), czy_indices(czy_indices_c), AttributesPlus(AttributesPlus_c){
+    MeshEasy(const std::vector<float>& vertices_c, bool czy_indices_c = false, bool AttributesPlus_c = false, bool simplestAttributes_c = false) 
+    : vertices(vertices_c), czy_indices(czy_indices_c), AttributesPlus(AttributesPlus_c), simplestAttributes(simplestAttributes_c){
         setUp();
     }
 
@@ -73,7 +74,7 @@ public:
     }
 
 private:
-    bool czy_indices, AttributesPlus;
+    bool czy_indices, AttributesPlus, simplestAttributes;
     unsigned int VBO, EBO;
     std::vector<float> vertices; 
     std::vector<unsigned int> indices;
@@ -105,7 +106,7 @@ private:
 
 
 
-        if(!czy_indices){
+        if(!czy_indices && !simplestAttributes){
         glEnableVertexAttribArray(0);   
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 
@@ -115,7 +116,12 @@ private:
         glEnableVertexAttribArray(2);   
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
         }
+        if(simplestAttributes){
+            glEnableVertexAttribArray(0);   
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        }
         
         glBindVertexArray(0);
     }
+    
 };

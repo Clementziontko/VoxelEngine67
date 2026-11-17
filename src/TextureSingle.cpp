@@ -27,6 +27,7 @@ void TextureSingle::inicjalizacja() {
 
 // Load image from disk using stb_image and upload texture data to GPU
 void TextureSingle::load() {
+    // glBindTexture(GL_TEXTURE_2D, ID);
     data = stbi_load(texturPath, &width, &height, &nrChannels, 0);
     if (data) {
         std::cout << nrChannels << std::endl;

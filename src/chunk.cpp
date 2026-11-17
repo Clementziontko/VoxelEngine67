@@ -136,7 +136,7 @@ void ChunkG::SettingAttributesForChunk() {
 // Draw the chunk mesh using the active shader and camera view
 void ChunkG::Draw(ShaderManager& shader, CAM& cam) {
     shader.uniformSetInt("blinn", 1);
-    shader.uniformSetInt("gamma", 0);
+    shader.uniformSetInt("gamma", 1);
     shader.uniformSetInt("StencilTest", 0);
     shader.uniformSetVec3("viewPos", cam.getViewPos());
     

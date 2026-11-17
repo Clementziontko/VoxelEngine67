@@ -25,6 +25,7 @@ public:
     void uniformSetFloat(const char* location, float float_to_set);
     void uniformSetMat(const char* location, const glm::mat4& mat_to_set);
     void uniformSetVec3(const char* location, const glm::vec3& vec3_to_set);
+    void uniformSetVec4(const char* location, const glm::vec4& vec4_to_set);
 
 private:
     void kompilacjaShaderow(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr);

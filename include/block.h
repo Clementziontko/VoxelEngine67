@@ -53,10 +53,13 @@ struct PointLight {
 
 // Represents directional sunlight for global scene illumination
 struct Sun {
-    glm::vec3 direction = glm::vec3(-0.2f, -1.0f, -0.3f); // Direction vector from the light source
-    glm::vec3 ambient   = glm::vec3(0.15f, 0.18f, 0.22f); // Sky blue ambient light
-    glm::vec3 diffuse   = glm::vec3(1.0f, 0.98f, 0.9f);    // Warm sunlight diffuse color
-    glm::vec3 specular  = glm::vec3(1.0f, 1.0f, 1.0f);    // Pure white specular highlights
+    glm::vec3 direction = glm::vec3(-0.85f, -0.3f, -0.1f); // Kierunek dopasowany do słońca po prawej
+    glm::vec3 ambient   = glm::vec3(0.12f, 0.15f, 0.22f); // Ciemny, chłodny błękit w cieniach (odbicie od nieba)
+    glm::vec3 diffuse   = glm::vec3(1.2f,  0.85f, 0.5f);  // Intensywne, ciepłe złoto-pomarańczowe światło słoneczne
+    glm::vec3 specular  = glm::vec3(0.5f,  0.4f,  0.3f);  // Delikatny połysk na krawędziach wokseli
+    
+    // Dodatkowe parametry jasności/intensywności, które warto mieć w strukturze:
+    // float intensity     = 1.2f;                           // Ogólny mnożnik jasności światła
 };
 
 // Custom hash function for glm::ivec3 to enable usage in unordered containers (e.g., std::unordered_map)

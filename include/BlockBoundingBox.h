@@ -14,7 +14,7 @@ public:
 
     void DrawGeometryShader(ShaderManager& shader, const glm::vec3& pos);
     void DrawStencilTest(ShaderManager& shader, ShaderManager& shaderBoundingBox, const glm::vec3& pos, unsigned int VAO);
-    void Draw(ShaderManager& shader, const glm::vec3& pos);
+    void Draw(ShaderManager& shader, ShaderManager& shader2, const glm::vec3& pos, const glm::vec3& face);
 
 private:
     unsigned int VBO, VAO, EBO, geometryVAO;

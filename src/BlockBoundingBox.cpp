@@ -91,15 +91,46 @@ void BlockBoundingBox::DrawStencilTest(ShaderManager& shader, ShaderManager& sha
     glDisable(GL_STENCIL_TEST);
 }
 
-void BlockBoundingBox::Draw(ShaderManager& shader, const glm::vec3& pos) {
+void BlockBoundingBox::Draw(ShaderManager& shader, ShaderManager& shader2, const glm::vec3& pos, const glm::vec3& face) {
     shader.shaderRun();
     glm::mat4 cube(1.0f);
-    cube = glm::translate(cube, pos);
-    cube = glm::scale(cube, glm::vec3(1.02f));
+
+    float scaleFactor = 1.02f;
+    
+    cube = glm::translate(cube, pos + glm::vec3(0.5f)); // Przesunięcie na środek woksela (jeśli VBO bazuje na 0..1)
+    cube = glm::scale(cube, glm::vec3(scaleFactor));      // Skala ze środka
+    cube = glm::translate(cube, glm::vec3(-0.5f));        // Powrót
+
     shader.uniformSetMat("model", cube);
-    shader.uniformSetVec3("boxColor", glm::vec3(1.0f, 0.0f, 0.0f));
+    shader.uniformSetVec3("boxColor", glm::vec3(0.9, 0.9, 0.9));
 
     glBindVertexArray(VAO);
     glDrawElements(GL_LINES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+
+
+    shader2.shaderRun();
+    glm::mat4 cube2(1.0f);
+    cube2 = glm::translate(cube2, pos + glm::vec3(0.5f)); // Przesunięcie na środek woksela (jeśli VBO bazuje na 0..1)
+    cube2 = glm::scale(cube2, glm::vec3(scaleFactor));      // Skala ze środka
+    cube2 = glm::translate(cube2, glm::vec3(-0.5f));        // Powrót
+
+    shader2.uniformSetVec3("hitFace", face);
+    shader2.uniformSetVec4("hitFaceColor", glm::vec4(1.0, 1.0, 1.0, 0.15));
+    shader2.uniformSetMat("model", cube2);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
+    glDisable(GL_CULL_FACE); // Wyłącza odrzucanie tylnych ścianek
+
+
+    glBindVertexArray(geometryVAO);
+    glDrawArrays(GL_POINTS, 0, 1);
+    glBindVertexArray(0);
+    glEnable(GL_CULL_FACE);
+    // Przywrócenie domyślnych stanów OpenGL
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+
 }
